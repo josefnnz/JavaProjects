@@ -39,8 +39,8 @@ public class Knight extends Piece {
 		// Following for loop takes care of cases:
 		// 1) Move left or right 2 squares.
 		// 2) Then move up or down 1 square.
-		int[] twoLeftOrRight = {x - 2, x + 2};
-		int[] oneUpOrDown = {y - 1, y + 1};
+		int[] twoLeftOrRight = {this.x - 2, this.x + 2};
+		int[] oneUpOrDown = {this.y - 1, this.y + 1};
 		for (int x : twoLeftOrRight) {
 			for (int y : oneUpOrDown){
 				if (inBounds(x, y)) {

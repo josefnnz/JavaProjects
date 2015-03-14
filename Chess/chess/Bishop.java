@@ -13,6 +13,7 @@ public class Bishop extends Piece {
 		this.findSquaresAttacking();
 	}
 
+	@Override
 	public void findSquaresAttacking() {
 		// Create empty HashSet to place current attacking squares in.
 		attacking = new HashSet<Square>();

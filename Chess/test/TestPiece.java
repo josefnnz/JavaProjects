@@ -39,6 +39,75 @@ public class TestPiece {
 	}
 
 	@Test
+	public void testRookFindAttackingSquares() {
+		Board b = new Board(false);
+		Piece rook = b.getPiece(0, 0);
+
+		HashSet<Square> expected = new HashSet<>();
+		for (int y = 1; y < 8; y++) {
+			expected.add(new Square(0, y));
+		}
+		for (int x = 1; x < 8; x++) {
+			expected.add(new Square(x, 0));
+		}
+
+		assertEquals(expected, rook.getAttacking());
+	}
+
+	@Test
+	public void testKingFindAttackingSquares() {
+		Board b = new Board(false);
+		Piece king = b.getPiece(3, 0);
+
+		HashSet<Square> expected = new HashSet<>();
+		expected.add(new Square(2, 0));
+		expected.add(new Square(2, 1));
+		expected.add(new Square(3, 1));
+		expected.add(new Square(4, 1));
+		expected.add(new Square(4, 0));
+
+		assertEquals(expected, king.getAttacking());
+	}
+
+	@Test
+	public void testQueenFindAttackingSquares() {
+		Board b = new Board(false);
+		Piece queen = b.getPiece(4, 0);
+
+		HashSet<Square> expected = new HashSet<>();
+		for (int y = 1; y < 8; y++) {
+			expected.add(new Square(4, y));
+		}
+		for (int x = 5; x < 8; x++) {
+			expected.add(new Square(x, 0));
+		}
+		for (int x = 3; x >= 0; x--) {
+			expected.add(new Square(x, 0));
+		}
+		for (int x = 5, y = 1; queen.inBounds(x, y); x++, y++) {
+			expected.add(new Square(x, y));
+		}
+		for (int x = 3, y = 1; queen.inBounds(x, y); x--, y++) {
+			expected.add(new Square(x, y));
+		}
+
+		assertEquals(expected, queen.getAttacking());
+	}
+
+	@Test
+	public void testPawnFindAttackingSquares() {
+		Board b = new Board(false);
+		Piece pawn = b.getPiece(0, 1);
+
+		HashSet<Square> expected = new HashSet<>();
+		expected.add(new Square(0, 2));
+		expected.add(new Square(0, 3));
+		expected.add(new Square(1, 2));
+
+		assertEquals(expected, pawn.getAttacking());
+	}
+
+	@Test
 	public void testValidMoveKnight() {
 		Board b = new Board(false);
 		Piece knight = b.getPiece(1, 0);

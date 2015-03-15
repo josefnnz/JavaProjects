@@ -42,11 +42,28 @@ public class PlayChessGame {
                 }
             }
 
-            if (game.hasSelectedPiece) {
+            if (game.hasSelectedPiece()) {
+                // Get selected Piece and its (x,y) coordinates.
+                Piece selectedPiece = game.selectedPiece();
+                int xSelected = selectedPiece.getX();
+                int ySelected = selectedPiece.getY();
+
+                // Color in squares where Piece lies and the squares it
+                // is permitted to move.
                 StdDrawPlus.setPenColor(StdDrawPlus.RED);
-                int xSelected = game.selectedPiece().getX();
-                int ySelected = game.selectedPiece().getY();
                 StdDrawPlus.filledSquare(xSelected + .5, ySelected + .5, .5);
+                StdDrawPlus.setPenColor(StdDrawPlus.MAGENTA);
+                if (!game.hasMovedPiece()) {                   
+                    for (Square s : selectedPiece.getAttacking()) {
+                        int xSquare = s.getX();
+                        int ySquare = s.getY();
+                        StdDrawPlus.filledSquare(xSquare + .5, ySquare + .5, .5);
+                        b.drawPieceOnBoard(xSquare, ySquare);
+                    }
+                } else {
+                    StdDrawPlus.filledSquare(game.xSelected() + .5, game.ySelected() + .5, .5);
+                }
+
                 b.drawPieceOnBoard(xSelected, ySelected);
             }          
 
@@ -157,8 +174,9 @@ public class PlayChessGame {
     public void select(int x, int y) {
         Piece squareOccupant = board.getPiece(x, y);
 
-        if (squareOccupant == null) {
-            // Evaluates if player is selecting an emtpy Square.
+        if ((squareOccupant == null) || (squareOccupant.isBlack() != isBlack)) {
+            // Evaluates if player is selecting an emtpy Square, 
+            // or the player is taking an opponent's pieces.
             // This only happens when the player has already selected a piece.
             // Guaranteed that piece has already been selected by the canSelect() method.
             // First, record this new move in the GAMELOG.

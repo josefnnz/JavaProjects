@@ -56,9 +56,10 @@ public class Pawn extends Piece {
 
 		// Can move two squares on initial move.
 		if (!hasMoved) {
+			Piece oneSquareAheadOccupant = board.getPiece(this.x, this.y + verticalShift);
 			squareOccupant = board.getPiece(this.x, this.y + 2 * verticalShift);
-			if (squareOccupant == null) {
-				// Evaluates if Square two spaces ahead of Pawn is empty.
+			if ((oneSquareAheadOccupant == null) && (squareOccupant == null)) {
+				// Evaluates if both Squares one and two spaces ahead of Pawn are empty.
 				attacking.add(board.getSquare(this.x, this.y + 2 * verticalShift));
 			}
 		}

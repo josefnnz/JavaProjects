@@ -6,10 +6,10 @@ public class Board {
 	private final int size = 8;
 	private Square[][] squares;
 	private Piece[][] pieces;
-	private HashSet<Piece> blackPieces;
-	private HashSet<Piece> whitePieces;
-	private Piece blackKing;
-	private Piece whiteKing;
+	public HashSet<Piece> blackPieces;
+	public HashSet<Piece> whitePieces;
+	public Piece blackKing;
+	public Piece whiteKing;
 
 	public Board(boolean isEmpty) {
 		createArrayOfSquares();
@@ -28,8 +28,10 @@ public class Board {
 	}
 
 	/** Remove piece at location (x,y) from board. */
-	public void removePiece(int x, int y) {
+	public Piece removePiece(int x, int y) {
+		Piece squareOccupant = pieces[x][y];
 		pieces[x][y] = null;
+		return squareOccupant;
 	}
 
 	/** Return Square at location (x,y). */
@@ -42,13 +44,52 @@ public class Board {
 		return size;
 	}
 
+	/** Return true if King is in check.
+	  * Return false otherwise. */
+	public boolean isKingInCheck(boolean isBlack) {
+		// Choose desired King and opposition's pieces.
+		Piece king = whiteKing;
+		HashSet<Piece> oppositionPieces = blackPieces;
+		if (isBlack) {
+			king = blackKing;
+			oppositionPieces = whitePieces;
+		}
+
+		// Gather all attacking spaces of Black pieces.
+		HashSet<Square> allOppositionAttackingSpaces = new HashSet<>();
+		for (Piece p : oppositionPieces) {
+			allOppositionAttackingSpaces.addAll(p.getAttacking());
+		}
+
+		Square kingLocation = new Square(king.getX(), king.getY());
+
+		return allOppositionAttackingSpaces.contains(kingLocation);
+	}
+
+
 	/** Returns true if moving PIECE to location (x,y) does not put his king in check.
 	  * Returns false otherwise. 
 	  * Take into account whether THIS piece moving will result in king be in check.
 	  * Assumes location (x,y) is valid Square for PIECE to move in regards to that PIECE's
 	  * movement regulations. (e.g. Bishops move diagonally. Knights move in L-shape pattern. */
-	public boolean validMove(Piece piece, int x, int y) {
-		return false;
+	public boolean validMove(Piece p, int x, int y) {
+
+		return true;
+	}
+
+	public void movePiece(Piece p, int x, int y) {
+		int xOriginal = p.getX();
+		int yOriginal = p.getY();
+
+		// Change (x,y) location on PIECE.
+		p.setX(x);
+		p.setY(y);
+
+		// Move piece to new location on board.
+		this.placePiece(p, x, y);
+
+		// Remove piece from old location on board.
+		this.removePiece(xOriginal, yOriginal);
 	}
 
 	// /** Move piece to location (x,y).

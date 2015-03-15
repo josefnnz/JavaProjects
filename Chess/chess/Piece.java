@@ -26,6 +26,26 @@ public abstract class Piece {
 		return type;
 	}
 
+	/** Set x-coordinate of Square where Piece is located. */
+	public void setX(int x) {
+		this.x = x;
+	}
+
+	/** Set y-coordinate of Square where Piece is located. */
+	public void setY(int y) {
+		this.y = y;
+	}
+
+	/** Return x-coordinate of Square where Piece is located. */
+	public int getX() {
+		return x;
+	}
+
+	/** Return y-coordinate of Square where Piece is located. */
+	public int getY() {
+		return y;
+	}
+
 	/** Returns list of squares THIS Piece is attacking. 
 	  * HashSet attacking created in constructor of each specific piece.
 	  * Hence, attacking will not be null by the calling of getAttacking. */

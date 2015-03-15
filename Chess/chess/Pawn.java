@@ -3,7 +3,8 @@ package chess;
 import java.util.HashSet;
 
 public class Pawn extends Piece {
-	public boolean hasMoved;
+	/** Hold original y-coordinate for pawn. When y-yOriginal != 0, pawn has moved. */
+	public int yOriginal;
 
 	public Pawn(boolean isBlack, Board board, int x, int y) {
 		this.isBlack = isBlack;
@@ -11,7 +12,7 @@ public class Pawn extends Piece {
 		this.x = x;
 		this.y = y;
 		this.type = "pawn";
-		this.hasMoved = false;
+		this.yOriginal = y;
 	}
 
 	@Override
@@ -29,7 +30,7 @@ public class Pawn extends Piece {
 
 		// Black moves downward. White moves upward.
 		int verticalShift = 1;
-		if (this.isBlack) {
+		if (this.isBlack()) {
 			verticalShift = -1;
 		}
 
@@ -37,25 +38,25 @@ public class Pawn extends Piece {
 		for (int x : xValues) {
 			if (inBounds(x, yAhead)) {
 				squareOccupant = board.getPiece(x, yAhead);
-				if (squareOccupant == null) {
-					// Evaluates if Square is empty.
-					if (this.x == x) {
-						// Evaluates if Pawn is moving forward.
-						// Pawn cannot move to an empty diagonal Square.
+				if (this.x == x) {
+					// Evaluates if Pawn is moving directly forward (not diagonally).
+					if (squareOccupant == null) {
+						// Evaluates if square in front of Pawn is empty.
 						attacking.add(board.getSquare(x, yAhead));
 					}
-				} else if ((squareOccupant.isBlack() != this.isBlack()) && (this.x != x)) {
-					// Evaluates if location (x,y) is occupied by an opposing piece and
-					// if location (x,y) is diagonal from pawn.
+				} else {
+					// Evaluates if Pawn is moving diagonally.
+					if ((squareOccupant != null) && (squareOccupant.isBlack() != this.isBlack())) {
+						// Evaluates if Square diagonal from Pawn is occupied by opposing piece.
 						attacking.add(board.getSquare(x, yAhead));
+					}
 				}
-				// Do nothing if Pawn is blocked by a piece in front of it, or no
-				// opposing pieces diagonally in front of it to take.
 			}
 		}
 
 		// Can move two squares on initial move.
-		if (!hasMoved) {
+		boolean hasNeverMoved = ((y - yOriginal) == 0);
+		if (hasNeverMoved) {
 			Piece oneSquareAheadOccupant = board.getPiece(this.x, this.y + verticalShift);
 			squareOccupant = board.getPiece(this.x, this.y + 2 * verticalShift);
 			if ((oneSquareAheadOccupant == null) && (squareOccupant == null)) {

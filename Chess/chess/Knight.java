@@ -10,13 +10,15 @@ public class Knight extends Piece {
 		this.x = x;
 		this.y = y;
 		this.type = "knight";
-		this.findSquaresAttacking();
 	}
 
 	@Override
 	public void findSquaresAttacking() {
 		// Create empty HashSet to place current attacking squares in.
 		attacking = new HashSet<Square>();
+
+		// Holds piece in location (x,y).
+		Piece squareOccupant = null;
 
 		// Knights can only move in  L-shape pattern.
 		// L-shape must consists of the following in order:
@@ -31,7 +33,15 @@ public class Knight extends Piece {
 		for (int x : oneLeftOrRight) {
 			for (int y : twoUpOrDown) {
 				if (inBounds(x, y)) {
-					attacking.add(board.getSquare(x, y));
+					squareOccupant = board.getPiece(x, y);
+					if (squareOccupant == null) {
+						// Evaluates if Square is empty.
+						attacking.add(board.getSquare(x, y));
+					} else if (squareOccupant.isBlack() != this.isBlack()) {
+						// Evaluates if location (x,y) is occupied by an opposing piece.
+						attacking.add(board.getSquare(x, y));
+					}
+					// Do nothing if location (x,y) is occupied by a piece on the same team.
 				}
 			}
 		}
@@ -44,7 +54,14 @@ public class Knight extends Piece {
 		for (int x : twoLeftOrRight) {
 			for (int y : oneUpOrDown){
 				if (inBounds(x, y)) {
-					attacking.add(board.getSquare(x, y));
+					squareOccupant = board.getPiece(x, y);
+					if (squareOccupant == null) {
+						attacking.add(board.getSquare(x, y));
+					} else if (squareOccupant.isBlack() != this.isBlack()) {
+						// Evaluates if location (x,y) is occupied by an opposing piece.
+						attacking.add(board.getSquare(x, y));
+					}
+					// Do nothing if location (x,y) is occupied by a piece on the same team.
 				}
 			}
 		}

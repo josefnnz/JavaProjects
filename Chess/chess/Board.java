@@ -1,9 +1,15 @@
 package chess;
 
+import java.util.HashSet;
+
 public class Board {
 	private final int size = 8;
 	private Square[][] squares;
 	private Piece[][] pieces;
+	private HashSet<Piece> blackPieces;
+	private HashSet<Piece> whitePieces;
+	private Piece blackKing;
+	private Piece whiteKing;
 
 	public Board(boolean isEmpty) {
 		createArrayOfSquares();
@@ -36,6 +42,36 @@ public class Board {
 		return size;
 	}
 
+	/** Returns true if moving PIECE to location (x,y) does not put his king in check.
+	  * Returns false otherwise. 
+	  * Take into account whether THIS piece moving will result in king be in check.
+	  * Assumes location (x,y) is valid Square for PIECE to move in regards to that PIECE's
+	  * movement regulations. (e.g. Bishops move diagonally. Knights move in L-shape pattern. */
+	public boolean validMove(Piece piece, int x, int y) {
+		return false;
+	}
+
+	// /** Move piece to location (x,y).
+	//   * Assumes moving to location (x,y) is a valid move. */
+	// public void movePiece(int x, int y) {
+	// 	// Remove existing piece from (x,y).
+	// 	// If no existing piece, remove method will do nothing.
+	// 	board.removePiece(x,y);
+
+	// 	// Place THIS piece at (x,y).
+	// 	board.placePiece(this, x, y);
+
+	// 	// Remove THIS piece from original location.
+	// 	board.removePiece(this.x, this.y);
+
+	// 	// Update (x,y) location of THIS piece.
+	// 	this.x = x;
+	// 	this.y = y;
+
+	// 	// Update HashSet ATTACKING to consists of new attacking squares due to the move.
+	// 	this.findSquaresAttacking();
+	// }
+
 	/** Construct array of Squares. */
 	private void createArrayOfSquares() {
 		squares = new Square[size][size];
@@ -46,9 +82,16 @@ public class Board {
 		}
 	}
 
-	/** Construct array of Pieces. */
+	/** Constructs the following:
+	  * 1) Array of Pieces 
+	  * 2) Set of black pieces.
+	  * 3) Set of white pieces.
+	  * 4) Black king piece stored.
+	  * 5) White king piece stored. */
 	private void createArrayOfPieces(boolean isEmpty) {
 		pieces = new Piece[size][size];
+		blackPieces = new HashSet<Piece>();
+		whitePieces = new HashSet<Piece>();
 		
 		if (isEmpty) {
 			// Evaluates if empty board is to be constructed.
@@ -60,19 +103,18 @@ public class Board {
 
 		// Row 0 has White pieces. 
 		// Row 7 has Black pieces.
-		// Use boolean to keep track of whether current piece placing is Black or White.
-		boolean isBlack = true;
 
 		// Place Rooks.
 		int[] xRook = {0, 7};
 		for (int x : xRook) {
 			for (int y : yRows) {
 				if (y == 0) {
-					isBlack = false;
+					pieces[x][y] = new Rook(false, this, x, y);
+					whitePieces.add(pieces[x][y]);
 				} else {
-					isBlack = true;
+					pieces[x][y] = new Rook(true, this, x, y);
+					blackPieces.add(pieces[x][y]);
 				}
-				pieces[x][y] = new Rook(isBlack, this, x, y);
 			}
 		}
 
@@ -81,11 +123,12 @@ public class Board {
 		for (int x : xKnight) {
 			for (int y : yRows) {
 				if (y == 0) {
-					isBlack = false;
+					pieces[x][y] = new Knight(false, this, x, y);
+					whitePieces.add(pieces[x][y]);
 				} else {
-					isBlack = true;
+					pieces[x][y] = new Knight(true, this, x, y);
+					blackPieces.add(pieces[x][y]);
 				}
-				pieces[x][y] = new Knight(isBlack, this, x, y);
 			}
 		}
 
@@ -94,11 +137,12 @@ public class Board {
 		for (int x : xBishop) {
 			for (int y : yRows) {
 				if (y == 0) {
-					isBlack = false;
+					pieces[x][y] = new Bishop(false, this, x, y);
+					whitePieces.add(pieces[x][y]);
 				} else {
-					isBlack = true;
+					pieces[x][y] = new Bishop(true, this, x, y);
+					blackPieces.add(pieces[x][y]);
 				}
-				pieces[x][y] = new Bishop(isBlack, this, x, y);
 			}
 		}
 
@@ -106,22 +150,26 @@ public class Board {
 		int xQueen = 4;
 		for (int y : yRows) {
 			if (y == 0) {
-				isBlack = false;
+				pieces[xQueen][y] = new Queen(false, this, xQueen, y);
+				whitePieces.add(pieces[xQueen][y]);
 			} else {
-				isBlack = true;
+				pieces[xQueen][y] = new Queen(true, this, xQueen, y);
+				blackPieces.add(pieces[xQueen][y]);
 			}
-			pieces[xQueen][y] = new Queen(isBlack, this, xQueen, y);
 		}
 
 		// Place Kings.
 		int xKing = 3;
 		for (int y : yRows) {
 			if (y == 0) {
-				isBlack = false;
+				whiteKing = new King(false, this, xKing, y);
+				pieces[xKing][y] = whiteKing;
+				whitePieces.add(whiteKing);
 			} else {
-				isBlack = true;
+				blackKing = new King(true, this, xKing, y);
+				pieces[xKing][y] = blackKing;
+				blackPieces.add(blackKing);
 			}
-			pieces[xKing][y] = new King(isBlack, this, xKing, y);
 		}
 
 		// Place Pawns.
@@ -131,13 +179,59 @@ public class Board {
 		for (int y : yPawn) {
 			for (int x = 0; x < size; x++) {
 				if (y == 1) {
-					isBlack = false;
+					pieces[x][y] = new Pawn(false, this, x, y);
+					whitePieces.add(pieces[x][y]);
 				} else {
-					isBlack = true;
+					pieces[x][y] = new Pawn(true, this, x, y);
+					blackPieces.add(pieces[x][y]);
 				}
-				pieces[x][y] = new Pawn(isBlack, this, x, y);
 			}
 		}
+
+		// Call findAttackingSquares on all pieces on board. 
+		for (int x = 0; x < size; x++) {
+			for (int y = 0; y < size; y++) {
+				Piece current = pieces[x][y];
+				if (current != null) {
+					pieces[x][y].findSquaresAttacking();
+				}
+			}
+		}
+	}
+
+	public void drawBoard() {
+		StdDrawPlus.setXscale(0, size);
+		StdDrawPlus.setYscale(0, size);
+
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+
+                if ((i + j) % 2 == 0) {
+                	StdDrawPlus.setPenColor(StdDrawPlus.LIGHT_GRAY);
+                } else {
+                	StdDrawPlus.setPenColor(StdDrawPlus.BOOK_BLUE);
+                }                
+
+                StdDrawPlus.filledSquare(i + .5, j + .5, .5);
+
+                drawPieceOnBoard(i, j);
+            }
+        }
+	}
+
+	public void drawPieceOnBoard(int i, int j) {
+		Piece piece = pieces[i][j];
+		if (piece == null) {
+			return;
+		}  
+
+		String type = piece.getType();
+		String color = "white";
+		if (piece.isBlack()) {
+			color = "black";
+		}
+
+		StdDrawPlus.picture(i + .5, j + .5, "img/" + color + "_" + type + ".png", 1, 1);
 	}
 
 }

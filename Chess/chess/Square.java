@@ -10,6 +10,16 @@ public class Square {
 		this.y = y;
 	}
 
+	/** Return x-coordinate. */
+	public int getX() {
+		return x;
+	}
+
+	/** Return y-coordinate. */
+	public int getY() {
+		return y;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null) {

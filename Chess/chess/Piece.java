@@ -42,6 +42,9 @@ public abstract class Piece {
 
 	/** Returns true if location (x,y) is valid Square for piece to move.
 	  * Returns false otherwise. 
+	  * Does not take into account whether THIS piece moving will result in king be in check.
+	  * The board has a validMove that ensures a piece's movement does not 
+	  * result in its king being in check.
 	  * Assumes HashSet ATTACKING is up-to-date. */
 	public boolean validMove(int x, int y) {
 		if (!inBounds(x, y)) {
@@ -64,27 +67,6 @@ public abstract class Piece {
 		}
 
 		return true;
-	}
-
-	/** Move piece to location (x,y).
-	  * Assumes moving to location (x,y) is a valid move. */
-	public void move(int x, int y) {
-		// Remove existing piece from (x,y).
-		// If no existing piece, remove method will do nothing.
-		board.removePiece(x,y);
-
-		// Place THIS piece at (x,y).
-		board.placePiece(this, x, y);
-
-		// Remove THIS piece from original location.
-		board.removePiece(this.x, this.y);
-
-		// Update (x,y) location of THIS piece.
-		this.x = x;
-		this.y = y;
-
-		// Update HashSet ATTACKING to consists of new attacking squares due to the move.
-		this.findSquaresAttacking();
 	}
 
 	/** Returns true if Square at location (x,y) is a valid location on the board.

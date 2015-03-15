@@ -73,13 +73,57 @@ public class Board {
 	  * Assumes location (x,y) is valid Square for PIECE to move in regards to that PIECE's
 	  * movement regulations. (e.g. Bishops move diagonally. Knights move in L-shape pattern. */
 	public boolean validMove(Piece p, int x, int y) {
+		if (!p.validMove(x, y)) {
+			// Evaluates if piece P cannot move to (x,y).
+			return false;
+		}
 
-		return true;
-	}
+		// Evaluates if piece P can move to (x,y).
+		// Now need to check that moving piece P to (x,y)
+		// does not put that piece's King in check.
 
-	public void movePiece(Piece p, int x, int y) {
+		// Record original location of piece P.
 		int xOriginal = p.getX();
 		int yOriginal = p.getY();
+
+		// Determine what color piece is moving.
+		boolean isBlack = p.isBlack();
+
+		// Move piece P to target location (x,y).
+		Piece pieceRemoved = this.movePiece(p, x, y);
+
+		// With piece moved, call findSquaresAttackingForAllPieces.
+		this.findSquaresAttackingForAllPieces();
+
+		// Determine if piece P moving to location (x,y)
+		// placed its King under check.
+		boolean isKingInCheck = this.isKingInCheck(isBlack);
+
+		// Move piece P back to original location.
+		this.movePiece(p, xOriginal, yOriginal);
+
+		// Place REMOVEDPIECE back on board.
+		this.placePiece(pieceRemoved, x, y);
+
+		// With piece's placed back in place, call findSquaresAttackingForAllPieces.
+		this.findSquaresAttackingForAllPieces();
+
+		// Return true if move did not result in the King being in check.
+		// i.e. Return true if IsKingInCheck is false.
+		//      Return false if isKingInCheck is true.
+		return !isKingInCheck;
+	}
+
+	/** Move piece P to new location (x,y). 
+	  * Return Piece that was removed from location (x,y).
+	  * If no Piece was removed, return null.  */
+	public Piece movePiece(Piece p, int x, int y) {
+		int xOriginal = p.getX();
+		int yOriginal = p.getY();
+
+		// Remove piece from target location.
+		// If no piece on target location, this will return null.
+		Piece pieceRemoved = this.removePiece(x, y);
 
 		// Change (x,y) location on PIECE.
 		p.setX(x);
@@ -90,28 +134,9 @@ public class Board {
 
 		// Remove piece from old location on board.
 		this.removePiece(xOriginal, yOriginal);
+
+		return pieceRemoved;
 	}
-
-	// /** Move piece to location (x,y).
-	//   * Assumes moving to location (x,y) is a valid move. */
-	// public void movePiece(int x, int y) {
-	// 	// Remove existing piece from (x,y).
-	// 	// If no existing piece, remove method will do nothing.
-	// 	board.removePiece(x,y);
-
-	// 	// Place THIS piece at (x,y).
-	// 	board.placePiece(this, x, y);
-
-	// 	// Remove THIS piece from original location.
-	// 	board.removePiece(this.x, this.y);
-
-	// 	// Update (x,y) location of THIS piece.
-	// 	this.x = x;
-	// 	this.y = y;
-
-	// 	// Update HashSet ATTACKING to consists of new attacking squares due to the move.
-	// 	this.findSquaresAttacking();
-	// }
 
 	/** Construct array of Squares. */
 	private void createArrayOfSquares() {
@@ -119,6 +144,18 @@ public class Board {
 		for (int x = 0; x < size; x++) {
 			for (int y = 0; y < size; y++) {
 				squares[x][y] = new Square(x, y);
+			}
+		}
+	}
+
+	private void findSquaresAttackingForAllPieces() {
+		// Call findSquaresAttacking on all pieces on board. 
+		for (int x = 0; x < size; x++) {
+			for (int y = 0; y < size; y++) {
+				Piece current = pieces[x][y];
+				if (current != null) {
+					pieces[x][y].findSquaresAttacking();
+				}
 			}
 		}
 	}
@@ -230,14 +267,7 @@ public class Board {
 		}
 
 		// Call findAttackingSquares on all pieces on board. 
-		for (int x = 0; x < size; x++) {
-			for (int y = 0; y < size; y++) {
-				Piece current = pieces[x][y];
-				if (current != null) {
-					pieces[x][y].findSquaresAttacking();
-				}
-			}
-		}
+		this.findSquaresAttackingForAllPieces();
 	}
 
 	public void drawBoard() {

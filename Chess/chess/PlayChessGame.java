@@ -42,20 +42,18 @@ public class PlayChessGame {
                 }
             }
 
-            if (game.hasSelectedPiece == true) {
+            if (game.hasSelectedPiece) {
                 StdDrawPlus.setPenColor(StdDrawPlus.RED);
-                StdDrawPlus.filledSquare(game.xSelected() + .5, game.ySelected() + .5, .5);
-                b.drawPieceOnBoard(game.xSelected(), game.ySelected());
-            }                
-            // if (StdDrawPlus.isSpacePressed() && b.canEndTurn()) {
-            // 	b.endTurn(); 
+                int xSelected = game.selectedPiece().getX();
+                int ySelected = game.selectedPiece().getY();
+                StdDrawPlus.filledSquare(xSelected + .5, ySelected + .5, .5);
+                b.drawPieceOnBoard(xSelected, ySelected);
+            }          
 
-            // 	won = b.winner();
-            // 	if( won == null )                 continue;
-            // 	if( won.equals("Fire") )          break;
-            // 	else if( won.equals("Water") )    break;
-            // 	else if( won.equals("No one") )   break;
-            // }
+            if (StdDrawPlus.isSpacePressed() && game.hasMovedPiece()) {
+            	game.endTurn(); 
+            	// won = b.winner();
+            }
             	
             StdDrawPlus.show(100);
         }
@@ -85,6 +83,10 @@ public class PlayChessGame {
 
     public boolean hasSelectedPiece() {
         return hasSelectedPiece;
+    }
+
+    public boolean hasMovedPiece() {
+        return hasMovedPiece;
     }
 
     /** Returns true if current player can select location (x,y).
@@ -168,6 +170,12 @@ public class PlayChessGame {
             MoveEntry moveToExecute = new MoveEntry(selectedPiece, xInitial, yInitial, x, y);
             gameLog.push(moveToExecute);
             board.movePiece(selectedPiece, x, y);
+            // When this is reached, the player has either:
+            // 1) Moved a piece for the first time.
+            // 2) Moved a piece, and then moved that same piece back to its original position.
+            // If Case 1, then hasMovedPiece changes from false to true.
+            // If Case 2, then hasMovedPiece changes from true to false.
+            hasMovedPiece = !hasMovedPiece;
             return;
         }
 
@@ -183,4 +191,16 @@ public class PlayChessGame {
         hasSelectedPiece = true;      
     }
 
+    /** End turn by switching control to other player (changing isBlack) and
+      * resetting the instance variables selectedPiece, xSelected,
+      * ySelected, hasSelectedPiece, and hasMovedPiece.
+      */
+    public void endTurn() {
+        isBlack = !isBlack;
+        selectedPiece = null;
+        xSelected = -1;
+        ySelected = -1;
+        hasSelectedPiece = false;
+        hasMovedPiece = false;
+    }
 }

@@ -3,12 +3,16 @@ package chess;
 import java.util.HashSet;
 
 public class King extends Piece {
+	private final int xOriginal;
+	private final int yOriginal;
 
 	public King(boolean isBlack, Board board, int x, int y) {
 		this.isBlack = isBlack;
 		this.board = board;
 		this.x = x;
 		this.y = y;
+		this.xOriginal = x;
+		this.yOriginal = y;
 		this.type = "king";
 	}
 
@@ -71,6 +75,46 @@ public class King extends Piece {
 					attacking.add(board.getSquare(x, this.y));
 				}
 				// Do nothing if location (x,y) is occupied by a piece on the same team.
+			}
+		}
+
+		if ((xOriginal != x) || (yOriginal != y)) {
+			hasMoved = true;
+		}
+
+		if (!hasMoved) {
+			Piece rookRight = board.getPiece(7, this.y); 
+			Piece rookLeft = board.getPiece(0, this.y);
+
+			boolean emptySpaceToRook = true;
+			if (rookRight != null) {
+				if (rookRight.getType().equals("rook") && !rookRight.hasMoved()) {
+					// Evaluates if rook that has never moved is to the right of the King.
+					for (int x = this.x + 1; x < 7; x++) {
+						if (board.getPiece(x, this.y) != null) {
+							emptySpaceToRook = false;
+						}
+					}
+					if (emptySpaceToRook) {
+						attacking.add(board.getSquare(5, this.y));
+					}
+				}
+			}
+
+			emptySpaceToRook = true;
+			if (rookLeft != null) {
+				if (rookLeft.getType().equals("rook") && !rookLeft.hasMoved()) {
+					// Evaluates if rook that has never moved is to the left of the King.
+					for (int x = this.x - 1; x >= 1; x--) {
+						if (board.getPiece(x, this.y) != null) {
+							Piece what = board.getPiece(x, this.y);
+							emptySpaceToRook = false;
+						}
+					}
+					if (emptySpaceToRook) {
+						attacking.add(board.getSquare(1, this.y));
+					}
+				}
 			}
 		}
 	}

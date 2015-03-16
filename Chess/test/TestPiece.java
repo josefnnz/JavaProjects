@@ -9,6 +9,28 @@ import java.util.HashSet;
 public class TestPiece {
 
 	@Test
+	public void testKingCanCastle() {
+		Board b = new Board(true);
+		Piece whiteKing = new King(false, b, 3, 0);
+		Piece rookLeft = new Rook(false, b, 0, 0);
+		Piece rookRight = new Rook(false, b, 7, 0);
+		for (int i = 0; i < 8; i++) {
+			b.placePiece(new Pawn(false, b, i, 1), i, 1);
+		}
+		b.placePiece(new Queen(false, b, 4, 0), 4, 0);
+		b.placePiece(whiteKing, 3, 0);
+		b.placePiece(rookLeft, 0, 0);
+		b.placePiece(rookRight, 7, 0);
+		b.findSquaresAttackingForAllPieces();		
+
+		HashSet<Square> expected = new HashSet<>();
+		expected.add(new Square(2, 0));
+		expected.add(new Square(1, 0));
+
+		assertEquals(expected, whiteKing.getAttacking());
+	}
+
+	@Test
 	public void testKnightFindAttackingSquares() {
 		Board b = new Board(false);
 		Piece knight = b.getPiece(1, 0);

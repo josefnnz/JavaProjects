@@ -4,7 +4,8 @@ import java.util.HashSet;
 
 public class Pawn extends Piece {
 	/** Hold original y-coordinate for pawn. When y-yOriginal != 0, pawn has moved. */
-	public int yOriginal;
+	private final int yOriginal;
+	private int numMoves;
 
 	public Pawn(boolean isBlack, Board board, int x, int y) {
 		this.isBlack = isBlack;
@@ -55,8 +56,18 @@ public class Pawn extends Piece {
 		}
 
 		// Can move two squares on initial move.
-		boolean hasNeverMoved = ((y - yOriginal) == 0);
-		if (hasNeverMoved) {
+		if ((y != yOriginal) && (numMoves == 0)) {
+			hasMoved = true;
+			numMoves += 1;
+		}
+
+		// This is only true for Pawns because Pawns cannot normally move backwards.
+		if ((y == yOriginal) && (numMoves == 1)) {
+			hasMoved = false;
+			numMoves -= 1;
+		}
+
+		if (!hasMoved) {
 			Piece oneSquareAheadOccupant = board.getPiece(this.x, this.y + verticalShift);
 			squareOccupant = board.getPiece(this.x, this.y + 2 * verticalShift);
 			if ((oneSquareAheadOccupant == null) && (squareOccupant == null)) {

@@ -260,6 +260,38 @@ public class PlayChessGame {
                 return;
             }
 
+            // Evaluates if choose empty square with a selected piece that has not moved.
+
+            if (selectedPiece.getType().equals("king")) {
+                if (Math.abs(x - selectedPiece.getX()) > 1) {
+                    // Evaluates if castling.
+                    // Add moving rook to the left to game log.
+                    // The proceeding code will add the king movement to the game log.
+                    Piece rook = board.getPiece(0, selectedPiece.getY());
+                    int xRookInitial = rook.getX();
+                    int yRookInitial = rook.getY();
+                    int xRookTerminal = selectedPiece.getX() - 1;
+                    int yRookTerminal = selectedPiece.getY();
+                    if (x - selectedPiece.getX() > 0) {
+                        // Evaluates if castling to the right.
+                        rook = board.getPiece(7, selectedPiece.getY());
+                        xRookInitial = rook.getX();
+                        yRookInitial = rook.getY();
+                        xRookTerminal = selectedPiece.getX() + 1;
+                        yRookTerminal = selectedPiece.getY();
+                    }
+
+                    MoveEntry firstMoveInCastleToExecute = 
+                              new MoveEntry(rook, xRookInitial, yRookInitial, null, 
+                                             xRookTerminal, yRookTerminal);
+
+                    gameLog.push(firstMoveInCastleToExecute);
+
+                    board.movePiece(rook, xRookTerminal, yRookTerminal);
+                                   
+                }
+            }
+
             // Evaluates if player has selected a piece and is choosing a location
             // to move the piece for the first time.
 
@@ -366,9 +398,6 @@ public class PlayChessGame {
                 String transformation = br.readLine();
                 Piece newPiece = null;
                 switch(transformation) {
-                    case "pawn":
-                        newPiece = pawn;
-                        break;
                     case "rook":
                         newPiece = new Rook(isBlackPiece, board, x, y);
                         break;
@@ -382,7 +411,8 @@ public class PlayChessGame {
                         newPiece = new Knight(isBlackPiece, board, x, y);
                         break;
                     default: 
-                        System.out.println("Must choose a piece. Cannot be a King.");
+                        System.out.println("Must choose a piece. Cannot be a King " +
+                                           "or a Pawn.");
                         break;
                 }
 

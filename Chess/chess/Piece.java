@@ -14,6 +14,8 @@ public abstract class Piece {
 	public int y;
 	// Squares THIS piece is attacking.
 	public HashSet<Square> attacking;
+	// Determine if a piece has moved or not.
+	public boolean hasMoved;
 
 	/** Return true if THIS piece is Black.
 	  * Return false if White. */
@@ -44,6 +46,10 @@ public abstract class Piece {
 	/** Return y-coordinate of Square where Piece is located. */
 	public int getY() {
 		return y;
+	}
+
+	public boolean hasMoved() {
+		return hasMoved;
 	}
 
 	/** Returns list of squares THIS Piece is attacking. 

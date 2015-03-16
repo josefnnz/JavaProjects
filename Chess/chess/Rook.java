@@ -3,12 +3,16 @@ package chess;
 import java.util.HashSet;
 
 public class Rook extends Piece {
+	private final int xOriginal;
+	private final int yOriginal;
 
 	public Rook(boolean isBlack, Board board, int x, int y) {
 		this.isBlack = isBlack;
 		this.board = board;
 		this.x = x;
 		this.y = y;
+		this.xOriginal = x;
+		this.yOriginal = y;
 		this.type = "rook";
 	}
 
@@ -19,6 +23,10 @@ public class Rook extends Piece {
 
 		// Holds piece in location (x,y).
 		Piece squareOccupant = null;
+
+		if ((xOriginal != this.x) || (yOriginal != this.y)) {
+			hasMoved = true;
+		}
 
 		// Rooks can only move up, down, left, or right.
 

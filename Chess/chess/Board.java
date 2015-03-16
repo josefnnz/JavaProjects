@@ -12,6 +12,7 @@ public class Board {
 	public HashSet<Piece> whitePiecesRemoved = new HashSet<>();
 	public Piece blackKing;
 	public Piece whiteKing;
+	public MoveEntry previousMove;
 
 	public Board(boolean isEmpty) {
 		createArrayOfSquares();
@@ -214,7 +215,13 @@ public class Board {
 		// }
 		this.findSquaresAttackingForAllPieces();
 
+		previousMove = new MoveEntry(p, xOriginal, yOriginal, pieceRemoved, x, y);
+
 		return pieceRemoved;
+	}
+
+	public MoveEntry getPreviousMove() {
+		return previousMove;
 	}
 
 	/** Construct array of Squares. */

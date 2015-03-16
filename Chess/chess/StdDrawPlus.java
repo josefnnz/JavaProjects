@@ -729,6 +729,18 @@ public final class StdDrawPlus implements ActionListener, MouseListener, MouseMo
         return isKeyPressed(KeyEvent.VK_N);
     }
 
+    public static boolean isBackspacePressed() {
+        return isKeyPressed(KeyEvent.VK_BACK_SPACE);
+    }
+
+    public static boolean isEnterPressed() {
+        return isKeyPressed(KeyEvent.VK_ENTER);
+    }
+
+    public static boolean isShiftPressed() {
+        return isKeyPressed(KeyEvent.VK_SHIFT);
+    }
+
     /**
      * This method cannot be called directly.
      */

@@ -46,7 +46,6 @@ public class TestBoard {
 		b.movePiece(whiteKnight, 1, 4);
 		whiteBishop.findSquaresAttacking();
 		whiteKnight.findSquaresAttacking();
-		b.drawBoard();
 		assertTrue(b.isKingInCheckMate(true));
 	}
 
@@ -64,6 +63,44 @@ public class TestBoard {
 		Piece blackBishop = b.getPiece(5, 7);
 		assertTrue(b.validMove(blackBishop, 4, 6));
 	}
+
+	@Test
+	public void testDrawingBoardDifferentColors() {
+		Board b = new Board(true);
+		b.drawBoard(false);
+        StdDrawPlus.setPenColor(StdDrawPlus.BLACK);
+        StdDrawPlus.filledSquare(0 + .5, 0 + .5, .5);
+        StdDrawPlus.setPenColor(StdDrawPlus.BLUE);
+        StdDrawPlus.filledSquare(1 + .5, 0 + .5, .5);
+        StdDrawPlus.setPenColor(StdDrawPlus.CYAN);
+        StdDrawPlus.filledSquare(2 + .5, 0 + .5, .5);
+        StdDrawPlus.setPenColor(StdDrawPlus.DARK_GRAY);
+        StdDrawPlus.filledSquare(3 + .5, 0 + .5, .5);
+        StdDrawPlus.setPenColor(StdDrawPlus.GRAY);
+        StdDrawPlus.filledSquare(4 + .5, 0 + .5, .5);
+        StdDrawPlus.setPenColor(StdDrawPlus.GREEN);
+        StdDrawPlus.filledSquare(5 + .5, 0 + .5, .5);
+        StdDrawPlus.setPenColor(StdDrawPlus.LIGHT_GRAY);
+        StdDrawPlus.filledSquare(6 + .5, 0 + .5, .5);
+        StdDrawPlus.setPenColor(StdDrawPlus.MAGENTA);
+        StdDrawPlus.filledSquare(7 + .5, 0 + .5, .5);
+        StdDrawPlus.setPenColor(StdDrawPlus.ORANGE);
+        StdDrawPlus.filledSquare(0 + .5, 1 + .5, .5);
+        StdDrawPlus.setPenColor(StdDrawPlus.PINK);
+        StdDrawPlus.filledSquare(1 + .5, 1 + .5, .5);
+        StdDrawPlus.setPenColor(StdDrawPlus.RED);
+        StdDrawPlus.filledSquare(2 + .5, 1 + .5, .5);
+        StdDrawPlus.setPenColor(StdDrawPlus.WHITE);
+        StdDrawPlus.filledSquare(3 + .5, 1 + .5, .5);
+        StdDrawPlus.setPenColor(StdDrawPlus.YELLOW);
+        StdDrawPlus.filledSquare(4 + .5, 1 + .5, .5);
+        StdDrawPlus.setPenColor(StdDrawPlus.BOOK_BLUE);
+        StdDrawPlus.filledSquare(5 + .5, 1 + .5, .5);
+        StdDrawPlus.setPenColor(StdDrawPlus.BOOK_LIGHT_BLUE);
+        StdDrawPlus.filledSquare(6 + .5, 1 + .5, .5);
+        StdDrawPlus.setPenColor(StdDrawPlus.BOOK_RED);
+        StdDrawPlus.filledSquare(7 + .5, 1 + .5, .5);
+   	}
 
 	/* Run the unit tests in this file. */
     public static void main(String... args) {

@@ -1,5 +1,8 @@
 package chess;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Stack;
 
 public class PlayChessGame {
@@ -19,6 +22,10 @@ public class PlayChessGame {
     private boolean hasMovedPiece;
     // Hold history of all moves in Chess game.
     private Stack<MoveEntry> gameLog = new Stack<MoveEntry>(); 
+    // Hold history of moves undone in Chess game.
+    private Stack<MoveEntry> movesUndone = new Stack<MoveEntry>();
+    // Create BufferedReader in order to read user input.
+    private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
 	public static void main(String[] args) {
         PlayChessGame game = new PlayChessGame();
@@ -26,10 +33,11 @@ public class PlayChessGame {
         int x = 20;
         int y = 20;
 
+        boolean isInBlackView = false;
         /** Monitors for mouse presses. Wherever the mouse is pressed,
             a new piece appears. */
         while(true) {    		
-            b.drawBoard();
+            b.drawBoard(isInBlackView);
 
             if (StdDrawPlus.mousePressed()) {
                 double xDouble = StdDrawPlus.mouseX();
@@ -52,19 +60,19 @@ public class PlayChessGame {
                 // is permitted to move.
                 StdDrawPlus.setPenColor(StdDrawPlus.RED);
                 StdDrawPlus.filledSquare(xSelected + .5, ySelected + .5, .5);
-                StdDrawPlus.setPenColor(StdDrawPlus.MAGENTA);
+                StdDrawPlus.setPenColor(StdDrawPlus.ORANGE);
                 if (!game.hasMovedPiece()) {                   
                     for (Square s : selectedPiece.getAttacking()) {
                         int xSquare = s.getX();
                         int ySquare = s.getY();
                         StdDrawPlus.filledSquare(xSquare + .5, ySquare + .5, .5);
-                        b.drawPieceOnBoard(xSquare, ySquare);
+                        b.drawPieceOnBoard(isInBlackView, xSquare, ySquare);
                     }
                 } else {
                     StdDrawPlus.filledSquare(game.xSelected() + .5, game.ySelected() + .5, .5);
                 }
 
-                b.drawPieceOnBoard(xSelected, ySelected);
+                b.drawPieceOnBoard(isInBlackView, xSelected, ySelected);
             }          
 
             if (StdDrawPlus.isSpacePressed() && game.hasMovedPiece()) {
@@ -72,14 +80,31 @@ public class PlayChessGame {
                 game.endTurn(); 
                 // Check if current player has been checkmated or not.
                 if (game.isGameOver()) {
-                    StdDrawPlus.setXscale(0, 8);
-                    StdDrawPlus.setYscale(0,8);
                     StdDrawPlus.picture(4, 4, "img/checkmate.jpg", 8, 8);
                     StdDrawPlus.show(5000);
+                    b.drawBoard(isInBlackView);
+                    StdDrawPlus.show(100);
+                }
+
+                if (game.isCurrentKingInCheck()) {
+                    StdDrawPlus.picture(4, 4, "img/check.png", 8, 8);
+                    StdDrawPlus.show(800);
                 }
             	// won = b.winner();
             }
-            	
+
+            if (StdDrawPlus.isBackspacePressed()) {
+            	game.undoMove();
+            }
+
+            if (StdDrawPlus.isEnterPressed()) {
+                game.redoMove();
+            }
+
+            if (StdDrawPlus.isShiftPressed()) {
+                isInBlackView = !isInBlackView;
+            }
+
             StdDrawPlus.show(100);
         }
 	}
@@ -210,44 +235,63 @@ public class PlayChessGame {
             // Then, move SELECTEDPIECE to new (x,y) position.
             // Guaranteed that Square (x,y) is a valid move location
             // for SQUAREOCCUPANT because canSelect() already ensured it.
-            if (!hasMovedPiece) {
-                // Evaluates if player has selected a piece and is choosing a location
-                // to move the piece for the first time.
+            if (hasMovedPiece) {
+                // Evaluates if player has selected a piece, moved it,
+                // and is moving it back to its original location.
+                MoveEntry previousMove = gameLog.pop();
+                int xInitial = previousMove.xInitial();
+                int yInitial = previousMove.yInitial();
+                int xTerminal = previousMove.xTerminal();
+                int yTerminal = previousMove.yTerminal();
+                Piece pieceTaken = previousMove.getPieceRemoved();
 
-                // Enter this move into GAMELOG.
-                int xInitial = selectedPiece.getX();
-                int yInitial = selectedPiece.getY();
-                MoveEntry moveToExecute = new MoveEntry(selectedPiece, xInitial, yInitial, null, x, y);
-                gameLog.push(moveToExecute);
+                // Move SELECTEDPIECE back to its original location
+                board.movePiece(selectedPiece, xInitial, yInitial);
 
-                // Move piece on board.
-                board.movePiece(selectedPiece, x, y);
+                // Place PIECETAKEN back on board at its previous location.
+                board.placePiece(pieceTaken, xTerminal, yTerminal);
 
-                // Record that piece was moved.
+                // Record that piece was moved back to original location.
                 hasMovedPiece = !hasMovedPiece;
 
                 // Update squares attacking for all pieces after move made.
                 board.findSquaresAttackingForAllPieces();
+
                 return;
             }
 
-            // Evaluates if player has selected a piece, moved it,
-            // and is moving it back to its original location.
-            MoveEntry previousMove = gameLog.pop();
-            int xInitial = previousMove.xInitial();
-            int yInitial = previousMove.yInitial();
-            int xTerminal = previousMove.xTerminal();
-            int yTerminal = previousMove.yTerminal();
-            Piece pieceTaken = previousMove.getPieceRemoved();
+            // Evaluates if player has selected a piece and is choosing a location
+            // to move the piece for the first time.
 
-            // Move SELECTEDPIECE back to its original location
-            board.movePiece(selectedPiece, xInitial, yInitial);
+            // Enter this move into GAMELOG.
+            int xInitial = selectedPiece.getX();
+            int yInitial = selectedPiece.getY();
+            MoveEntry moveToExecute = new MoveEntry(selectedPiece, xInitial, yInitial, null, x, y);
+            gameLog.push(moveToExecute);
 
-            // Place PIECETAKEN back on board at its previous location.
-            board.placePiece(pieceTaken, xTerminal, yTerminal);
+            // New move entered into GAMELOG. Now need to clear MOVESUNDONE.
+            // Because now there is a new sequence of moves, and previously undone moves
+            // are no longer relevant.
+            movesUndone = new Stack<MoveEntry>();
 
-            // Record that piece was moved back to original location.
+            // Move piece on board.
+            board.movePiece(selectedPiece, x, y);
+
+            // Record that piece was moved.
             hasMovedPiece = !hasMovedPiece;
+
+            if (selectedPiece.getType().equals("pawn")) {
+                // Evaluates if SELECTEDPIECE that is moving is a pawn.
+                if (selectedPiece.isBlack() && (y == 0)) {
+                    // Evaluates if SELECTEDPIECE is a black pawn, moving into a square
+                    // in which it can change to another a piece.
+                    this.transformPawn(selectedPiece, x, y);
+                } else if (!selectedPiece.isBlack() && (y == 7)) {
+                    // Evaluates if SELECTEDPIECE is a white pawn, moving into a square
+                    // in which it can change to another a piece.
+                    this.transformPawn(selectedPiece, x, y);
+                }
+            } 
 
             // Update squares attacking for all pieces after move made.
             board.findSquaresAttackingForAllPieces();
@@ -270,6 +314,12 @@ public class PlayChessGame {
             MoveEntry moveToExecute = new MoveEntry(selectedPiece, xInitial, yInitial,
                                                         pieceTaken, x, y);
             gameLog.push(moveToExecute);
+
+            // New move entered into GAMELOG. Now need to clear MOVESUNDONE.
+            // Because now there is a new sequence of moves, and previously undone moves
+            // are no longer relevant.
+            movesUndone = new Stack<MoveEntry>();
+
             board.movePiece(selectedPiece, x, y);
             // When this is reached, the player has either:
             // 1) Moved a piece for the first time.
@@ -277,6 +327,20 @@ public class PlayChessGame {
             // If Case 1, then hasMovedPiece changes from false to true.
             // If Case 2, then hasMovedPiece changes from true to false.
             hasMovedPiece = !hasMovedPiece;
+
+            if (selectedPiece.getType().equals("pawn")) {
+                // Evaluates if SELECTEDPIECE that is moving is a pawn.
+                if (selectedPiece.isBlack() && (y == 0)) {
+                    // Evaluates if SELECTEDPIECE is a black pawn, moving into a square
+                    // in which it can change to another a piece.
+                    this.transformPawn(selectedPiece, x, y);
+                } else if (!selectedPiece.isBlack() && (y == 7)) {
+                    // Evaluates if SELECTEDPIECE is a white pawn, moving into a square
+                    // in which it can change to another a piece.
+                    this.transformPawn(selectedPiece, x, y);
+                }
+            } 
+
             // Update squares attacking for all pieces after move made.
             board.findSquaresAttackingForAllPieces();
             return;
@@ -294,6 +358,84 @@ public class PlayChessGame {
         hasSelectedPiece = true;      
     }
 
+    public void transformPawn(Piece pawn, int x, int y) {
+        boolean isBlackPiece = pawn.isBlack();
+        while (true) {
+            System.out.println("Enter piece that pawn shall transform into:");
+            try {
+                String transformation = br.readLine();
+                Piece newPiece = null;
+                switch(transformation) {
+                    case "pawn":
+                        newPiece = pawn;
+                        break;
+                    case "rook":
+                        newPiece = new Rook(isBlackPiece, board, x, y);
+                        break;
+                    case "queen":
+                        newPiece = new Queen(isBlackPiece, board, x, y);
+                        break;
+                    case "bishop":
+                        newPiece = new Bishop(isBlackPiece, board, x, y);
+                        break;
+                    case "knight":
+                        newPiece = new Knight(isBlackPiece, board, x, y);
+                        break;
+                    default: 
+                        System.out.println("Must choose a piece. Cannot be a King.");
+                        break;
+                }
+
+                if (newPiece != null) {
+                    board.placePiece(newPiece, x, y);
+                    break;
+                }
+            } catch(IOException ex) {
+                continue;
+            }
+        }
+    }
+
+    public void undoMove() {
+        if (gameLog.isEmpty()) {
+            return;
+        }
+
+        MoveEntry undo = gameLog.pop();
+        movesUndone.push(undo);
+
+        Piece pieceMoved = undo.getPiece();
+        Piece pieceRemoved = undo.getPieceRemoved();
+        int xInitial = undo.xInitial();
+        int yInitial = undo.yInitial();
+        int xTerminal = undo.xTerminal();
+        int yTerminal = undo.yTerminal();
+
+        board.movePiece(pieceMoved, xInitial, yInitial);
+        board.placePiece(pieceRemoved, xTerminal, yTerminal);
+
+        // Change current player and reset all variables.
+        endTurn();
+    }
+
+    public void redoMove() {
+        if (movesUndone.isEmpty()) {
+            return;
+        }
+
+        MoveEntry redo = movesUndone.pop();
+        gameLog.push(redo);
+
+        Piece pieceMoved = redo.getPiece();
+        int xTerminal = redo.xTerminal();
+        int yTerminal = redo.yTerminal();
+
+        board.movePiece(pieceMoved, xTerminal, yTerminal);
+
+        // Change current player and reset all variables.
+        endTurn();
+    }
+
     /** End turn by switching control to other player (changing isBlack) and
       * resetting the instance variables selectedPiece, xSelected,
       * ySelected, hasSelectedPiece, and hasMovedPiece.
@@ -305,6 +447,10 @@ public class PlayChessGame {
         ySelected = -1;
         hasSelectedPiece = false;
         hasMovedPiece = false;
+    }
+
+    public boolean isCurrentKingInCheck() {
+        return board.isKingInCheck(isBlack);
     }
 
     /** Check to see if King is in checkmate. 

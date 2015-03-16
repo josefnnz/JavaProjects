@@ -349,31 +349,47 @@ public class Board {
 		this.findSquaresAttackingForAllPieces();
 	}
 
-	public void drawBoard() {
+	/** Draws board with isBlack pieces at the bottom of the board. */
+	public void drawBoard(boolean isBlack) {
 		StdDrawPlus.setXscale(0, size);
 		StdDrawPlus.setYscale(0, size);
 
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-
-                if ((i + j) % 2 == 0) {
-                	StdDrawPlus.setPenColor(StdDrawPlus.LIGHT_GRAY);
-                } else {
-                	StdDrawPlus.setPenColor(StdDrawPlus.BOOK_BLUE);
-                }                
+            	if (!isBlack) {
+	                if ((i + j) % 2 == 0) {
+	                	StdDrawPlus.setPenColor(StdDrawPlus.LIGHT_GRAY);
+	                } else {
+	                	StdDrawPlus.setPenColor(StdDrawPlus.BOOK_BLUE);
+	                }            
+            	} else {
+	                if ((i + j) % 2 == 0) {
+	                	StdDrawPlus.setPenColor(StdDrawPlus.BOOK_BLUE);
+	                } else {
+	                	StdDrawPlus.setPenColor(StdDrawPlus.LIGHT_GRAY);
+	                }                      	
+	            }
 
                 StdDrawPlus.filledSquare(i + .5, j + .5, .5);
-
-                drawPieceOnBoard(i, j);
             }
+        }
+
+        for (int i = 0; i < size; i++) {
+        	for (int j = 0; j < size; j++) {
+        		drawPieceOnBoard(isBlack, i, j);
+        	}
         }
 	}
 
-	public void drawPieceOnBoard(int i, int j) {
+	public void drawPieceOnBoard(boolean isBlack, int i, int j) {
 		Piece piece = pieces[i][j];
 		if (piece == null) {
 			return;
 		}  
+
+		if (isBlack) {
+			j = Math.abs(7 - j);
+		}
 
 		String type = piece.getType();
 		String color = "white";

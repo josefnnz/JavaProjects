@@ -84,9 +84,7 @@ public class PlayChessGame {
                     StdDrawPlus.show(5000);
                     b.drawBoard(isInBlackView);
                     StdDrawPlus.show(100);
-                }
-
-                if (game.isCurrentKingInCheck()) {
+                } else if (game.isCurrentKingInCheck()) {
                     StdDrawPlus.picture(4, 4, "img/check.png", 8, 8);
                     StdDrawPlus.show(800);
                 }

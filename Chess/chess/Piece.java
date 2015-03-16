@@ -65,28 +65,18 @@ public abstract class Piece {
 	  * Does not take into account whether THIS piece moving will result in king be in check.
 	  * The board has a validMove that ensures a piece's movement does not 
 	  * result in its king being in check.
-	  * Assumes HashSet ATTACKING is up-to-date. */
+	  * Assumes HashSet ATTACKING is up-to-date.
+	  * NOTE: ATTACKING only holds squares that THIS piece can legally move to. */
 	public boolean validMove(int x, int y) {
+		this.findSquaresAttacking();
+
 		if (!inBounds(x, y)) {
 			// Evaluates if location (x,y) is not on the board.
 			return false;
 		}
 
 		Square target = new Square(x, y);
-		if (!attacking.contains(target)) {
-			// Evalutes if TARGET is not a Square THIS piece is attacking.
-			return false;
-		}
-
-		Piece targetOccupant = board.getPiece(x, y);
-		if ((targetOccupant != null) && (targetOccupant.isBlack() == this.isBlack())) {
-			// Evaluates if a piece already lies on TARGET and the TARGET piece color
-			// is the same as THIS piece color. 
-			// Pieces of the same color may not take each other.
-			return false;
-		}
-
-		return true;
+		return attacking.contains(target);
 	}
 
 	/** Returns true if Square at location (x,y) is a valid location on the board.
@@ -94,6 +84,23 @@ public abstract class Piece {
 	  * Returns false otherwise. */
 	public boolean inBounds(int x, int y) {
 		return (x >= 0) && (x <= 7) && (y >= 0) && (y <= 7);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		Square thisSquareLocation = new Square(this.x, this.y);
+		Piece otherPiece = (Piece) obj;
+		Square otherPieceLocation = new Square(otherPiece.getX(), otherPiece.getY());
+
+		return thisSquareLocation.equals(otherPieceLocation);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = 17;
+		result = 31 * result + this.x;
+		result = 31 * result + this.y;
+		return result;
 	}
 
 }

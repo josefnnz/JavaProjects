@@ -11,19 +11,26 @@ public class MoveEntry {
 	private final Piece p;
 	private final int xInitial;
 	private final int yInitial;
+	private final Piece pieceRemoved;
 	private final int xTerminal;
 	private final int yTerminal;
 
-	public MoveEntry(Piece p, int xInitial, int yInitial, int xTerminal, int yTerminal) {
+	public MoveEntry(Piece p, int xInitial, int yInitial, 
+		                 Piece pieceRemoved, int xTerminal, int yTerminal) {
 		this.p = p;
 		this.xInitial = xInitial;
 		this.yInitial = yInitial;
+		this.pieceRemoved = pieceRemoved;
 		this.xTerminal = xTerminal;
 		this.yTerminal = yTerminal;
 	}
 
 	public Piece getPiece() {
 		return p;
+	}
+
+	public Piece getPieceRemoved() {
+		return pieceRemoved;
 	}
 
 	public int xInitial() {

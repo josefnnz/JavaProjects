@@ -118,6 +118,22 @@ public class PlayChessGame {
       *    it back to its original location.
       */ 
     public boolean canSelect(int x, int y) {
+        // Update attacking squares for all pieces.
+        board.findSquaresAttackingForAllPieces();
+
+        // If user clicks out of bounds and has not moved a piece,
+        // unselect current selected piece.  But return false.
+        // This unhighlights the squares where a piece can move.
+        if ((x < 0) || (x > 7) || (y < 0) || (y > 7)) {
+            if (hasSelectedPiece && !hasMovedPiece) {
+                selectedPiece = null;
+                xSelected = -1;
+                ySelected = -1;
+                hasSelectedPiece = false;
+            }
+            return false;
+        }
+        
         Piece squareOccupant = board.getPiece(x, y);
 
         if (!hasSelectedPiece) {
@@ -174,9 +190,66 @@ public class PlayChessGame {
     public void select(int x, int y) {
         Piece squareOccupant = board.getPiece(x, y);
 
-        if ((squareOccupant == null) || (squareOccupant.isBlack() != isBlack)) {
-            // Evaluates if player is selecting an emtpy Square, 
-            // or the player is taking an opponent's pieces.
+        if (squareOccupant == null) {
+            // Evaluates if player is selecting an emtpy Square.
+            // This may happen in the following cases:
+            // 1) Player has selected a piece, and is moving it.
+            // 2) Player has selected a piece, has moved it, but has decided to move it back to
+            //    its original location.
+            // This only happens when the player has already selected a piece.
+            // Guaranteed that piece has already been selected by the canSelect() method.
+            // First, record this new move in the GAMELOG.
+            // Then, move SELECTEDPIECE to new (x,y) position.
+            // Guaranteed that Square (x,y) is a valid move location
+            // for SQUAREOCCUPANT because canSelect() already ensured it.
+            if (!hasMovedPiece) {
+                // Evaluates if player has selected a piece and is choosing a location
+                // to move the piece for the first time.
+
+                // Enter this move into GAMELOG.
+                int xInitial = selectedPiece.getX();
+                int yInitial = selectedPiece.getY();
+                MoveEntry moveToExecute = new MoveEntry(selectedPiece, xInitial, yInitial, null, x, y);
+                gameLog.push(moveToExecute);
+
+                // Move piece on board.
+                board.movePiece(selectedPiece, x, y);
+
+                // Record that piece was moved.
+                hasMovedPiece = !hasMovedPiece;
+
+                // Update squares attacking for all pieces after move made.
+                board.findSquaresAttackingForAllPieces();
+                return;
+            }
+
+            // Evaluates if player has selected a piece, moved it,
+            // and is moving it back to its original location.
+            MoveEntry previousMove = gameLog.pop();
+            int xInitial = previousMove.xInitial();
+            int yInitial = previousMove.yInitial();
+            int xTerminal = previousMove.xTerminal();
+            int yTerminal = previousMove.yTerminal();
+            Piece pieceTaken = previousMove.getPieceRemoved();
+
+            // Move SELECTEDPIECE back to its original location
+            board.movePiece(selectedPiece, xInitial, yInitial);
+
+            // Place PIECETAKEN back on board at its previous location.
+            board.placePiece(pieceTaken, xTerminal, yTerminal);
+
+            // Record that piece was moved back to original location.
+            hasMovedPiece = !hasMovedPiece;
+
+            // Update squares attacking for all pieces after move made.
+            board.findSquaresAttackingForAllPieces();
+            return;
+        }
+
+        // Evaluates if SQUAREOCCUPANT is not null.
+
+        if (squareOccupant.isBlack() != isBlack) {
+            // Evaluates if player is taking an opponent's pieces.
             // This only happens when the player has already selected a piece.
             // Guaranteed that piece has already been selected by the canSelect() method.
             // First, record this new move in the GAMELOG.
@@ -185,7 +258,9 @@ public class PlayChessGame {
             // for SQUAREOCCUPANT because canSelect() already ensured it.
             int xInitial = selectedPiece.getX();
             int yInitial = selectedPiece.getY();
-            MoveEntry moveToExecute = new MoveEntry(selectedPiece, xInitial, yInitial, x, y);
+            Piece pieceTaken = board.getPiece(x, y);
+            MoveEntry moveToExecute = new MoveEntry(selectedPiece, xInitial, yInitial,
+                                                        pieceTaken, x, y);
             gameLog.push(moveToExecute);
             board.movePiece(selectedPiece, x, y);
             // When this is reached, the player has either:
@@ -194,6 +269,8 @@ public class PlayChessGame {
             // If Case 1, then hasMovedPiece changes from false to true.
             // If Case 2, then hasMovedPiece changes from true to false.
             hasMovedPiece = !hasMovedPiece;
+            // Update squares attacking for all pieces after move made.
+            board.findSquaresAttackingForAllPieces();
             return;
         }
 

@@ -37,6 +37,21 @@ public class TestBoard {
 		assertFalse(b.isKingInCheck(true));
 	}
 
+	@Test
+	public void testValidMoveWhenKingIsInCheckAndCanTakePiecePuttingKingInCheck() {
+		Board b = new Board(false);
+		b.removePiece(3, 1);
+		b.removePiece(4, 1);
+		b.removePiece(3, 6);
+		b.removePiece(4, 6);
+
+		Piece whiteQueen = b.getPiece(4, 0);
+		b.movePiece(whiteQueen, 4, 6);
+
+		Piece blackBishop = b.getPiece(5, 7);
+		assertTrue(b.validMove(blackBishop, 4, 6));
+	}
+
 	/* Run the unit tests in this file. */
     public static void main(String... args) {
         jh61b.junit.textui.runClasses(TestBoard.class);

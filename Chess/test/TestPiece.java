@@ -73,6 +73,19 @@ public class TestPiece {
 	}
 
 	@Test
+	public void testWhitePawnFindAttackingSquareWithOpposingPieceDiagonal() {
+		Board b = new Board(false);
+		Piece pawn = b.getPiece(0, 1);
+		b.movePiece(pawn, 0, 5);
+		pawn.findSquaresAttacking();
+
+		HashSet<Square> expected = new HashSet<>();
+		expected.add(new Square(1, 6));
+
+		assertEquals(expected, pawn.getAttacking());
+	}
+
+	@Test
 	public void testValidMoveKnight() {
 		Board b = new Board(false);
 		Piece knight = b.getPiece(1, 0);

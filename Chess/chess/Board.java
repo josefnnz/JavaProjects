@@ -7,7 +7,9 @@ public class Board {
 	private Square[][] squares;
 	private Piece[][] pieces;
 	public HashSet<Piece> blackPieces;
+	public HashSet<Piece> blackPiecesRemoved = new HashSet<>();
 	public HashSet<Piece> whitePieces;
+	public HashSet<Piece> whitePiecesRemoved = new HashSet<>();
 	public Piece blackKing;
 	public Piece whiteKing;
 
@@ -19,7 +21,22 @@ public class Board {
 	/** Place piece at location (x,y).
 	  * Assumes (x,y) is an empty square. */
 	public void placePiece(Piece p, int x, int y) {
+		// Add P to set of active pieces.
+		// Remove P from set of inactive pieces.
+		// If P not in set of inactive pieces, nothing is done.
 		pieces[x][y] = p;
+
+		if (p == null) {
+			return;
+		}
+
+		// if (p.isBlack()) {
+		// 	blackPieces.add(p);
+		// 	blackPiecesRemoved.remove(p);
+		// } else {
+		// 	whitePieces.add(p);
+		// 	whitePiecesRemoved.remove(p);
+		// }
 	}
 
 	/** Return piece at location (x,y). */
@@ -47,12 +64,24 @@ public class Board {
 	/** Return true if King is in check.
 	  * Return false otherwise. */
 	public boolean isKingInCheck(boolean isBlack) {
-		// Choose desired King and opposition's pieces.
+		// // Choose desired King and opposition's pieces.
 		Piece king = whiteKing;
-		HashSet<Piece> oppositionPieces = blackPieces;
+		// HashSet<Piece> oppositionPieces = blackPieces;
 		if (isBlack) {
 			king = blackKing;
-			oppositionPieces = whitePieces;
+		// 	oppositionPieces = whitePieces;
+		}
+
+		HashSet<Piece> oppositionPieces = new HashSet<>();
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				Piece pieceInCurrentSquare = pieces[i][j];
+				if (pieceInCurrentSquare != null) {
+					if (pieceInCurrentSquare.isBlack() != isBlack) {
+						oppositionPieces.add(pieceInCurrentSquare);
+					}
+				}
+			}
 		}
 
 		// Gather all attacking spaces of Black pieces.
@@ -64,6 +93,7 @@ public class Board {
 		Square kingLocation = new Square(king.getX(), king.getY());
 
 		return allOppositionAttackingSpaces.contains(kingLocation);
+
 	}
 
 
@@ -135,6 +165,18 @@ public class Board {
 		// Remove piece from old location on board.
 		this.removePiece(xOriginal, yOriginal);
 
+		// Remove PIECEREMOVED from set of active pieces.
+		// // Place PIECEREMOVED in set of inactive pieces.
+		// if (pieceRemoved != null) {
+		// 	if (pieceRemoved.isBlack()) {
+		// 		blackPieces.remove(pieceRemoved);
+		// 		blackPiecesRemoved.add(pieceRemoved);
+		// 	} else {
+		// 		whitePieces.remove(pieceRemoved);
+		// 		whitePiecesRemoved.add(pieceRemoved);
+		// 	}
+		// }
+
 		return pieceRemoved;
 	}
 
@@ -148,7 +190,7 @@ public class Board {
 		}
 	}
 
-	private void findSquaresAttackingForAllPieces() {
+	public void findSquaresAttackingForAllPieces() {
 		// Call findSquaresAttacking on all pieces on board. 
 		for (int x = 0; x < size; x++) {
 			for (int y = 0; y < size; y++) {

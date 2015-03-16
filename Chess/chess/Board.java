@@ -96,6 +96,42 @@ public class Board {
 
 	}
 
+	public boolean isKingInCheckMate(boolean isBlack) {
+		// Check if King isBlack is in check.  
+		// If not, return false.
+		// Otherwise, check to see if any isBlack piece has a move
+		// that results in the king not being in check.
+		if (!this.isKingInCheck(isBlack)) {
+			return false;
+		}
+
+		// Gather all pieces of isBlack color.
+		HashSet<Piece> allPiecesOfIsBlack = new HashSet<>();
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				Piece pieceInCurrentSquare = pieces[i][j];
+				if (pieceInCurrentSquare != null) {
+					if (pieceInCurrentSquare.isBlack() == isBlack) {
+						allPiecesOfIsBlack.add(pieceInCurrentSquare);
+					}
+				}
+			}
+		}
+
+		// Check to see if any of the pieces can move and result in its
+		// king not being in check.
+		for (Piece current : allPiecesOfIsBlack) {
+			HashSet<Square> currentSquaresAttacking = current.getAttacking();
+			for (Square s : currentSquaresAttacking) {
+				boolean hasValidMove = this.validMove(current, s.getX(), s.getY());
+				if (hasValidMove) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
 
 	/** Returns true if moving PIECE to location (x,y) does not put his king in check.
 	  * Returns false otherwise. 
@@ -176,6 +212,7 @@ public class Board {
 		// 		whitePiecesRemoved.add(pieceRemoved);
 		// 	}
 		// }
+		this.findSquaresAttackingForAllPieces();
 
 		return pieceRemoved;
 	}

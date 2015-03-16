@@ -68,7 +68,15 @@ public class PlayChessGame {
             }          
 
             if (StdDrawPlus.isSpacePressed() && game.hasMovedPiece()) {
-            	game.endTurn(); 
+                // Switch players.
+                game.endTurn(); 
+                // Check if current player has been checkmated or not.
+                if (game.isGameOver()) {
+                    StdDrawPlus.setXscale(0, 8);
+                    StdDrawPlus.setYscale(0,8);
+                    StdDrawPlus.picture(4, 4, "img/checkmate.jpg", 8, 8);
+                    StdDrawPlus.show(5000);
+                }
             	// won = b.winner();
             }
             	
@@ -298,4 +306,11 @@ public class PlayChessGame {
         hasSelectedPiece = false;
         hasMovedPiece = false;
     }
+
+    /** Check to see if King is in checkmate. 
+      * Return tree if King is in checkmate. */
+    public boolean isGameOver() {
+        return board.isKingInCheckMate(isBlack);
+    }
+
 }

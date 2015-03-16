@@ -38,6 +38,19 @@ public class TestBoard {
 	}
 
 	@Test
+	public void testIsKingInCheckmate() {
+		Board b = new Board(false);
+		Piece whiteBishop = b.getPiece(2, 0);
+		Piece whiteKnight = b.getPiece(1, 0);
+		b.movePiece(whiteBishop, 2, 6);
+		b.movePiece(whiteKnight, 1, 4);
+		whiteBishop.findSquaresAttacking();
+		whiteKnight.findSquaresAttacking();
+		b.drawBoard();
+		assertTrue(b.isKingInCheckMate(true));
+	}
+
+	@Test
 	public void testValidMoveWhenKingIsInCheckAndCanTakePiecePuttingKingInCheck() {
 		Board b = new Board(false);
 		b.removePiece(3, 1);
